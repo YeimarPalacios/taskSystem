@@ -1,0 +1,16 @@
+<li class="list-group-item">
+    <div>
+        <h5>{{ title }}</h5>
+        <p>{{ desc }}</p>
+        <small>Asignado a: {{ assign }}</small>
+    </div>
+    <div class="task-actions">
+        <select class="form-control form-control-sm task-status">
+            <option value="pendiente">Pendiente</option>
+            <option value="en_proceso">En Proceso</option>
+            <option value="completada">Completada</option>
+        </select>
+        <button class="btn btn-secondary btn-sm edit-task" data-toggle="modal" data-target="#editTaskModal">Editar</button>
+        <button onclick="eliminarTask()" class="btn btn-danger btn-sm delete-task">Eliminar</button>
+    </div>
+</li>
