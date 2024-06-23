@@ -6,12 +6,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from .decorators import require_authentication
-
-def vista_no_protegida(request):
-    # Esta vista solo será accesible si el usuario está autenticado
-    return JsonResponse({'mensaje': 'publico'})
-
+from myapp.security.decorators import require_authentication
 
 def example_view(request):
     return render(request, 'example.html')
@@ -45,8 +40,8 @@ def login_view(request):
 def menu_view(request):
     return render(request, 'menu.html')
 
-#@csrf_exempt
-#@require_authentication
+@csrf_exempt
+@require_authentication
 def panel_view(request):
      # Obtén el token JWT almacenado en la sesión
     authorization_data = request.session.get('authorization', None)
@@ -73,7 +68,7 @@ def registro_view(request):
                 'password': form_data['password1'],  # Utiliza password1 en lugar de password
             }
             response = requests.post(
-                f'{settings.API_BASE_URL}/authorization/api/register/',
+                f'{settings.API_BASE_URL}/services/api/register/',
                 json=serialized_data
             )
 
@@ -92,7 +87,8 @@ def registro_view(request):
         form = RegistroForm()
     return render(request, 'registro.html', {'form': form})
 
-
+@csrf_exempt
+@require_authentication
 def render_task_item(request):
     if request.method == 'GET':
         title = request.GET.get('title')

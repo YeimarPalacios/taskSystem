@@ -3,26 +3,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from myapp.models import Usuario, Oauth
-from .serializers import UserSerializer, OauthSerializer
+from .serializers import OauthSerializer
 from django.core import serializers
 from datetime import datetime, timedelta
 import jwt
+import pytz
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
 
-
-#@method_decorator(csrf_exempt, name='dispatch')
-class RegisterView(APIView):
-    def post(self, request):
-        print("Invocaste al API ")
-        print (request.data)
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     def post(self, request):
@@ -55,7 +45,10 @@ class IntrospectView(APIView):
         try:
             payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
             oauth = Oauth.objects.get(access_token=access_token)
-            if oauth.expire_token < datetime.utcnow():
+            expire_token_aware = oauth.expire_token.replace(tzinfo=pytz.UTC)
+            current_time_aware = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            
+            if expire_token_aware < current_time_aware:
                 return Response({"active": False}, status=status.HTTP_401_UNAUTHORIZED)
             return Response({"active": True})
         except jwt.ExpiredSignatureError:
@@ -69,12 +62,16 @@ class RefreshTokenView(APIView):
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
             oauth = Oauth.objects.get(refresh_token=refresh_token)
-            if oauth.expire_token < datetime.utcnow():
+            
+            expire_token_aware = oauth.expire_token.replace(tzinfo=pytz.UTC)
+            current_time_aware = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            
+            if expire_token_aware < current_time_aware:
                 return Response({"error": "Refresh token expired"}, status=status.HTTP_401_UNAUTHORIZED)
             
-            access_token = jwt.encode({'usuario_id': payload['usuario_id'], 'exp': datetime.utcnow() + timedelta(minutes=settings.JWT_EXP_DELTA_MINUTES)}, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+            access_token = jwt.encode({'usuario_id': payload['usuario_id'], 'exp': current_time_aware + timedelta(minutes=settings.JWT_EXP_DELTA_MINUTES)}, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
             oauth.access_token = access_token
-            oauth.expire_token = datetime.utcnow() + timedelta(minutes=settings.JWT_EXP_DELTA_MINUTES)
+            oauth.expire_token = current_time_aware + timedelta(minutes=settings.JWT_EXP_DELTA_MINUTES)
             oauth.save()
             return Response({'access_token': access_token})
         except jwt.ExpiredSignatureError:

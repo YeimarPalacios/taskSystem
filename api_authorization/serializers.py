@@ -1,11 +1,6 @@
 from rest_framework import serializers
-from myapp.models import Usuario, Oauth
+from myapp.models import  Oauth
 
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Usuario
-        fields = ['nombre','apellido','correo','password']
 
 class OauthSerializer(serializers.ModelSerializer):
     class Meta:
