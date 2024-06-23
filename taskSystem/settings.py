@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authorization',
+    'api_authorization',
+    'api_general',
     'rest_framework',
     'myapp'
 ]
@@ -149,10 +150,3 @@ REST_FRAMEWORK = {
 
 API_BASE_URL = 'http://localhost:8000'  # URL base de la API en entorno de desarrollo
 
-PUBLIC_URLS = [
-    ''
-    '/api/',
-    '/menu/',
-    '/panel/',
-    '/publico/',
-]
