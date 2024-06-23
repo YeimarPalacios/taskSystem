@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
-    {% include 'myapp/menu.html' %}
+    {% include 'menu.html' %}
     
     <div class="container">
         <h1 class="my-4 text-center">Panel de Control de Tareas</h1>
@@ -18,7 +18,7 @@
     <div id="username" data-username="{{ user }}"></div>
         <div class="card mb-4">
             <div class="card-header">
-                {{user}} Crea una Tarea
+                {{user.nombre}} {{user.apellido}} Crea una Tarea
             </div>
             <div class="card-body">
                 <form id="task-form">
@@ -46,7 +46,7 @@
             <div class="card-body">
                 <ul class="list-group" id="task-list">
                     <!-- Las tareas se agregarán aquí dinámicamente -->
-                    <!-- {% include 'myapp/task_item.html' %}-->
+                    <!-- {% include 'task_item.html' %}-->
                 </ul>
             </div>
         </div>
