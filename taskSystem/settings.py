@@ -30,15 +30,27 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-   'django.contrib.contenttypes',
+    'daphne',
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api_authorization',
     'api_general',
     'rest_framework',
-    'myapp'
+    'myapp',
+    'channels',
 ]
+
+# Definir el backend de canal de capa
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'myapp.middleware.JWTMiddleware',
+    'myapp.security.middleware_base.BaseMiddleware',
 ]
 
 ROOT_URLCONF = 'taskSystem.urls'
@@ -69,7 +81,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'taskSystem.wsgi.application'
-
+ASGI_APPLICATION = 'taskSystem.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
