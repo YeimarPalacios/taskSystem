@@ -1,12 +1,18 @@
 import json
 import requests
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from myapp.forms.forms import LoginForm, RegistroForm
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from myapp.security.decorators import require_authentication
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.template.loader import render_to_string
+import re
+
 
 def example_view(request):
     return render(request, 'example.html')
@@ -27,7 +33,9 @@ def login_view(request):
             )
 
             if response.status_code == 200:
-                request.session['authorization'] = response.json()
+                session_info = response.json()
+                request.session['authorization'] = session_info
+                
                 return redirect('panel')
             else:
                 # Mostrar un mensaje de error al usuario
@@ -87,23 +95,27 @@ def registro_view(request):
         form = RegistroForm()
     return render(request, 'registro.html', {'form': form})
 
-@csrf_exempt
-@require_authentication
+# @csrf_exempt
+# @require_authentication
 def render_task_item(request):
     if request.method == 'GET':
         title = request.GET.get('title')
         desc = request.GET.get('desc')
         assign_email = request.GET.get('assign')
+        print("correo antes de quitar el @")
+        print(assign_email)
 
         correo = re.sub(r'[^\w.-]', '', assign_email)[:100]
-        # channel_layer = get_channel_layer()
-        # async_to_sync(channel_layer.group_send)(
-        #     f'user_{correo}',
-        #     {
-        #         'type': 'send_notification',
-        #         'message': f'Nueva tarea asignada: {title}'
-        #     }
-        # )
+        print("correo despues de quitar el @")
+        print(correo)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'user_{correo}',
+            {
+                'type': 'send_notification',
+                'message': f'Nueva tarea asignada: {title}'
+            }
+        )
 
         context = {
             'title': title,

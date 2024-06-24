@@ -66,8 +66,8 @@ class RefreshTokenView(APIView):
             expire_token_aware = oauth.expire_token.replace(tzinfo=pytz.UTC)
             current_time_aware = datetime.utcnow().replace(tzinfo=pytz.UTC)
             
-            if expire_token_aware < current_time_aware:
-                return Response({"error": "Refresh token expired"}, status=status.HTTP_401_UNAUTHORIZED)
+            #if expire_token_aware < current_time_aware:
+            #    return Response({"error": "Refresh token expired"}, status=status.HTTP_401_UNAUTHORIZED)
             
             access_token = jwt.encode({'usuario_id': payload['usuario_id'], 'exp': current_time_aware + timedelta(minutes=settings.JWT_EXP_DELTA_MINUTES)}, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
             oauth.access_token = access_token
