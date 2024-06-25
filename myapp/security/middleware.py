@@ -12,8 +12,6 @@ class JWTMiddleware:
         authorization_data = request.session.get('authorization', None)
         if authorization_data is not None and 'access_token' in authorization_data:
             access_token = authorization_data['access_token']
-            print("acá hay un access-token")
-            print(access_token)
             if access_token:
                 try:
                     payload = decode(access_token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
@@ -42,6 +40,7 @@ class JWTMiddleware:
 
     @staticmethod
     def call_refresh_token(refresh_token):
+        print("entré a validar el refresh_token")
         return requests.post(f'{settings.API_BASE_URL}/authorization/api/refresh_token/', data={'refresh_token': refresh_token})   
 
     @staticmethod
@@ -51,7 +50,10 @@ class JWTMiddleware:
     @staticmethod
     def validate_response_refresh(response, request):
         if response.status_code == 200:
-            request.session['authorization'] = response.json()
+            authorization_data = request.session['authorization']
+            access_token = response.json()
+            authorization_data["access_token"] = access_token["access_token"]
+            request.session['authorization'] = authorization_data
             return None  # Continue processing the request after refreshing the token
         else:
-            return JsonResponse({'error': 'No autorizado - refresh'}, status=401)
+            return JsonResponse(response.json())
