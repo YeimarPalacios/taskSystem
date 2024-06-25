@@ -6,19 +6,24 @@
     <title>Panel de Control de Tareas</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Estilos adicionales si los necesitas -->
+    <style>
+        /* Estilos personalizados */
+    </style>
 </head>
 <body>
+    <!-- Incluye el menú -->
     {% include 'menu.html' %}
     
     <div class="container">
         <h1 class="my-4 text-center">Panel de Control de Tareas</h1>
-        <!-- Agrega un elemento HTML con el nombre de usuario como atributo data -->
-    <div id="username" data-username="{{ user }}"></div>
+        <!-- Sección para crear una nueva tarea -->
+        <div id="resultadoCrear"></div>
         <div class="card mb-4">
             <div class="card-header">
-                {{user.nombre}} {{user.apellido}} Crea una Tarea
+                {{ user.nombre }} {{ user.apellido }} Crea una Tarea
             </div>
             <div class="card-body">
                 <form id="task-form">
@@ -31,23 +36,39 @@
                         <textarea class="form-control" id="task-desc" rows="3" placeholder="Descripción de la tarea"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="task-assign">Asignar a</label>
-                        <input type="text" class="form-control" id="task-assign" placeholder="Nombre del responsable" required>
+                        <label for="task-deadline">Fecha de Vencimiento</label>
+                        <input type="datetime-local" class="form-control" id="task-deadline" required>
                     </div>
+                    <input type="hidden" id="task-status" value="pendiente">
                     <button type="submit" class="btn btn-primary">Agregar Tarea</button>
                 </form>
             </div>
         </div>
 
+        <!-- Sección para listar las tareas -->
         <div class="card">
             <div class="card-header">
                 Lista de Tareas
             </div>
             <div class="card-body">
-                <ul class="list-group" id="task-list">
-                    <!-- Las tareas se agregarán aquí dinámicamente -->
-                    <!-- {% include 'task_item.html' %}-->
-                </ul>
+                <div class="table-responsive">
+                    <table id="tablaTarea" class="table w-100">
+                        <thead class="text-center">
+                            <tr>
+                                <th>#</th>
+                                <th>Usuario</th>
+                                <th>Título</th>
+                                <th>Descripción</th>
+                                <th>Fecha de Vencimiento</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <!-- Aquí se cargarán dinámicamente las filas de la tabla -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -72,10 +93,6 @@
                             <label for="edit-task-desc">Descripción</label>
                             <textarea class="form-control" id="edit-task-desc" rows="3"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="edit-task-assign">Asignar a</label>
-                            <input type="text" class="form-control" id="edit-task-assign" required>
-                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -86,12 +103,67 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Modal para confirmar eliminación de tarea -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar esta tarea?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para asignar usuario a la tarea -->
+    <div class="modal fade" id="assignUserModal" tabindex="-1" aria-labelledby="assignUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignUserModalLabel">Asignar Usuario a Tarea</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="assign-user-form">
+                        <div class="form-group">
+                            <label for="assign-user">Seleccionar Usuario</label>
+                            <select class="form-control" id="assign-user" required>
+                                <!-- Opciones de usuarios se cargarán aquí dinámicamente -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-assign-user">Asignar Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JS al final del cuerpo -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <script src="../static/js/scripts.js"></script>
-   <script src="../static/js/task_item.js"></script>
+    <script src="../static/js/tarea.js"></script>
 
+    <!-- Script adicional si es necesario -->
+    <script>
+        // Script adicional aquí
+    </script>
 </body>
 </html>

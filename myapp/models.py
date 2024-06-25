@@ -29,12 +29,14 @@ class Oauth(models.Model):
     def __str__(self):
         return self.token
 
+
+
 class Tarea(models.Model):
     idUsuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     titulo = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=200, blank=True)
     fechaVencimiento = models.DateTimeField(default=timezone.now)  # Valor predeterminado usando timezone.now
-    estado = models.CharField(max_length=30, default='pendiente')
+    estado = models.CharField(max_length=30, choices=(('pendiente', 'Pendiente'), ('en_proceso', 'En Proceso'), ('completada', 'Completada')), default='pendiente')
 
     def __str__(self):
         return self.titulo
