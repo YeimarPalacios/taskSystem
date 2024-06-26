@@ -12,6 +12,7 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password
+from django.shortcuts import get_object_or_404 
 
 class RegisterView(APIView):
     def post(self, request):
@@ -22,8 +23,12 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserListView(APIView):
-    def get(self, request):
-        users = Usuario.objects.all()  # Obtén todos los usuarios
-        serializer = UserSerializer(users, many=True)  # Serializa los datos de los usuarios
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, pk=None):
+        if pk:
+            user = get_object_or_404(Usuario, pk=pk)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            users = Usuario.objects.all()
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
