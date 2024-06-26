@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
 
     path('usuarios/', UserListView.as_view(), name='user-list'),
+    path('usuarios/<int:pk>/', UserListView.as_view(), name='user-detail'),
     path('tareas/', TareaListCreateAPIView.as_view(), name='tarea-list-create'),
     path('tareas/<int:pk>/', TareaRetrieveUpdateDestroyAPIView.as_view(), name='tarea-detail'),
 ]

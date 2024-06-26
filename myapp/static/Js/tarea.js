@@ -17,6 +17,39 @@ function consultartareas() {
 }
 
 // Función que se ejecuta en caso de éxito al consultar tareas
+// En tu archivo `tarea.js`
+
+function obtenerNombreApellidoUsuario(idUsuario, callback) {
+    $.ajax({
+        type: "GET",
+        url: "http://127.0.0.1:8000/services/usuarios/" + idUsuario + "/",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        success: function (usuario) {
+            var nombreApellido = usuario.nombre + ' ' + usuario.apellido;
+            callback(nombreApellido);
+        },
+        error: function (xhr, status, error) {
+            console.error("Error al obtener usuario:", error);
+            callback('');
+        }
+    });
+}
+
+function consultartareas() {
+    $.ajax({
+        type: "GET",
+        url: "http://127.0.0.1:8000/services/tareas/",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        success: onExitotarea,
+        error: onErrortarea
+    });
+}
+
+// Función que se ejecuta en caso de éxito al consultar tareas
 function onExitotarea(data) {
     // Destruir la DataTable existente si ya ha sido inicializada
     if ($.fn.DataTable.isDataTable('#tablaTarea')) {
@@ -57,20 +90,36 @@ function onExitotarea(data) {
     // Limpiar y agregar filas a la DataTable
     dataTable.clear().draw();
     $.each(data, function (index, tarea) {
-        var boton0 = "<button class='btn btn-sm btn-primary editar-task' data-id='" + tarea.id + "' onclick='EditarTareaClick(this)'>Edit</button>";
-        var boton1 = "<button class='btn btn-sm btn-danger eliminar-task' data-id='" + tarea.id + "'>Delete</button>";
-        var boton2 = `<button class='btn btn-sm btn-success asignar-usuario' data-id='${tarea.id}' onclick='mostrarModalAsignarUsuario(${tarea.id})'>Asignar</button>`;
-        var boton3 = "<button class='btn btn-sm btn-warning cambiar-estado' data-id='" + tarea.id + "' onclick='mostrarModalCambiarEstado(" + tarea.id + ")'>Estado</button>";
+        var boton0 = "<button class='btn btn-sm btn-primary editar-task' data-id='" + tarea.id + "' onclick='EditarTareaClick(this)'><i class='bi bi-pen-fill'></i></button>";
+        var boton1 = "<button class='btn btn-sm btn-danger eliminar-task' data-id='" + tarea.id + "'><i class='bi bi-trash'></i></button>";
+        var boton2 = `<button class='btn btn-sm btn-success asignar-usuario' data-id='${tarea.id}' onclick='mostrarModalAsignarUsuario(${tarea.id})'><i class='bi bi-person-plus'></i></button>`;
+        var boton3 = "<button class='btn btn-sm btn-warning cambiar-estado' data-id='" + tarea.id + "' onclick='mostrarModalCambiarEstado(" + tarea.id + ")'><i class='bi bi-check'></i></button>";
 
-        dataTable.row.add([
-            tarea.id,
-            tarea.idUsuario || '', // Si idUsuario es null o undefined, mostrar un string vacío
-            tarea.titulo,
-            tarea.descripcion,
-            tarea.fechaVencimiento,
-            tarea.estado,
-            boton0 + ' ' + boton1 + ' ' + boton2 + ' ' + boton3
-        ]).draw(false);
+        // Obtener nombre y apellido del usuario si idUsuario no es null
+        if (tarea.idUsuario) {
+            obtenerNombreApellidoUsuario(tarea.idUsuario, function (nombreApellido) {
+                dataTable.row.add([
+                    tarea.id,
+                    nombreApellido,
+                    tarea.titulo,
+                    tarea.descripcion,
+                    tarea.fechaVencimiento,
+                    tarea.estado,
+                    "<div class='boton-container'>" + boton0 +' '+ boton1 + "</div><div class='boton-container'>" + boton2 +' '+ boton3 + "</div>"
+                ]).draw(false);
+            });
+        } else {
+            // Si idUsuario es null, agregar una fila con datos vacíos para idUsuario
+            dataTable.row.add([
+                tarea.id,
+                'No asignado', // Mostrar vacío si idUsuario es null
+                tarea.titulo,
+                tarea.descripcion,
+                tarea.fechaVencimiento,
+                tarea.estado,
+                "<div class='boton-container'>" + boton0 +' '+ boton1 + "</div><div class='boton-container'>" + boton2 +' '+ boton3 + "</div>"
+            ]).draw(false);
+        }
     });
 }
 
@@ -84,6 +133,30 @@ function onErrortarea(xhr, status, error) {
         text: 'Hubo un problema al cargar las tareas. Inténtelo de nuevo más tarde.'
     });
 }
+
+// Llamar a la función para consultar tareas al cargar la página u otro evento apropiado
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Función para agregar una nueva tarea
 function mostrarFormularioCrearTarea() {
