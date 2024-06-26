@@ -79,12 +79,37 @@ class RefreshTokenView(APIView):
         except (jwt.InvalidTokenError, Oauth.DoesNotExist):
             return Response({"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+
+import requests
+from django.shortcuts import redirect
+from django.contrib import messages
+
 class LogoutView(APIView):
     def post(self, request):
-        access_token = request.data.get('access_token')
-        try:
-            oauth = Oauth.objects.get(access_token=access_token)
-            oauth.delete()
-            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        except Oauth.DoesNotExist:
-            return Response({"error": "Invalid access token"}, status=status.HTTP_400_BAD_REQUEST)
+        # Obtener el token de acceso de la sesión del usuario
+        authorization_data = request.session.get('authorization', None)
+        
+        if authorization_data:
+            access_token = authorization_data.get('access_token')
+            
+            # Llamar a la API de cierre de sesión
+            response = requests.post(
+                f'{settings.API_BASE_URL}/authorization/api/logout/',
+                json={'access_token': access_token}
+            )
+            
+            if response.status_code == 200:
+                # Eliminar la información de autorización de la sesión
+                del request.session['authorization']
+                messages.success(request, 'Sesión cerrada exitosamente.')
+            else:
+                messages.error(request, 'Error al cerrar la sesión. Inténtalo nuevamente.')
+        else:
+            messages.error(request, 'No estás autenticado.')
+
+        return redirect('login')
+
+        
+        
+    

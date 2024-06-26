@@ -6,6 +6,7 @@ from .notifications import routing
 urlpatterns = [
     path('', views.example_view, name='example'),
     path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('menu/', views.menu_view, name='menu'),
     path('panel/', views.panel_view, name='panel'),
     path('registro/', views.registro_view, name='registro'),
