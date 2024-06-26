@@ -29,7 +29,7 @@ class TareaRetrieveUpdateDestroyAPIView(APIView):
 
     def put(self, request, pk):
         tarea = self.get_object(pk)
-        serializer = TareaSerializer(tarea, data=request.data)
+        serializer = TareaSerializer(tarea, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -39,15 +39,3 @@ class TareaRetrieveUpdateDestroyAPIView(APIView):
         tarea = self.get_object(pk)
         tarea.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-class TareaAssignUserAPIView(APIView):
-    def post(self, request, pk):
-        tarea = self.get_object(pk)
-        # Aquí deberías implementar la lógica para asignar un usuario a la tarea
-        return Response({"message": "User assigned to task successfully"}, status=status.HTTP_200_OK)
-
-class TareaChangeStatusAPIView(APIView):
-    def put(self, request, pk):
-        tarea = self.get_object(pk)
-        # Aquí deberías implementar la lógica para cambiar el estado de la tarea
-        return Response({"message": "Task status changed successfully"}, status=status.HTTP_200_OK)

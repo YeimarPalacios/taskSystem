@@ -20,3 +20,10 @@ class RegisterView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserListView(APIView):
+    def get(self, request):
+        users = Usuario.objects.all()  # Obtén todos los usuarios
+        serializer = UserSerializer(users, many=True)  # Serializa los datos de los usuarios
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

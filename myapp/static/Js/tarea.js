@@ -3,6 +3,7 @@ $(document).ready(function () {
     consultartareas(); // Llama a la función para cargar las tareas al cargar la página
 });
 
+// Función para consultar tareas
 function consultartareas() {
     $.ajax({
         type: "GET",
@@ -15,6 +16,7 @@ function consultartareas() {
     });
 }
 
+// Función que se ejecuta en caso de éxito al consultar tareas
 function onExitotarea(data) {
     // Destruir la DataTable existente si ya ha sido inicializada
     if ($.fn.DataTable.isDataTable('#tablaTarea')) {
@@ -55,24 +57,24 @@ function onExitotarea(data) {
     // Limpiar y agregar filas a la DataTable
     dataTable.clear().draw();
     $.each(data, function (index, tarea) {
-        var boton0 = "<button class='btn btn-sm btn-primary editar-task' data-id='${tarea.id}'>Edit</button>";
-        var boton1 = "<button class='btn btn-sm btn-danger eliminar-task' data-id='${tarea.id}'>Delete</button>";
-        var boton2 = "<button class='btn btn-sm btn-success asignar-usuario' data-id='${tarea.id}'>Asignar</button>";
-        var boton3 = "<button class='btn btn-sm btn-warning cambiar-estado' data-id='${tarea.id}'>Estado</button>";
+        var boton0 = "<button class='btn btn-sm btn-primary editar-task' data-id='" + tarea.id + "' onclick='EditarTareaClick(this)'>Edit</button>";
+        var boton1 = "<button class='btn btn-sm btn-danger eliminar-task' data-id='" + tarea.id + "'>Delete</button>";
+        var boton2 = `<button class='btn btn-sm btn-success asignar-usuario' data-id='${tarea.id}' onclick='mostrarModalAsignarUsuario(${tarea.id})'>Asignar</button>`;
+        var boton3 = "<button class='btn btn-sm btn-warning cambiar-estado' data-id='" + tarea.id + "' onclick='mostrarModalCambiarEstado(" + tarea.id + ")'>Estado</button>";
 
         dataTable.row.add([
             tarea.id,
-            tarea.idUsuario,
+            tarea.idUsuario || '', // Si idUsuario es null o undefined, mostrar un string vacío
             tarea.titulo,
             tarea.descripcion,
             tarea.fechaVencimiento,
             tarea.estado,
             boton0 + ' ' + boton1 + ' ' + boton2 + ' ' + boton3
         ]).draw(false);
-
     });
 }
 
+// Función que se ejecuta en caso de error al consultar tareas
 function onErrortarea(xhr, status, error) {
     console.error("Error al cargar las tareas:", error);
     // Aquí puedes manejar el error, por ejemplo, mostrar un mensaje al usuario
@@ -83,163 +85,363 @@ function onErrortarea(xhr, status, error) {
     });
 }
 
+// Función para agregar una nueva tarea
+function mostrarFormularioCrearTarea() {
+    // Cambiar el título del formulario
+    var titulo = $("#agregarTareaModalLabel");
+    titulo.text("Agregar Tarea");
 
+    // Cambiar el texto del botón de submit
+    var btnform = $("#btn-form-tarea");
+    btnform.text("Agregar Tarea");
 
-
-
-
-
-
-
-    $('#task-form').submit(function(event) {
-        event.preventDefault();
-        var formData = {
-            titulo: $('#task-title').val(),
-            descripcion: $('#task-desc').val(),
-            fecha_vencimiento: $('#task-deadline').val(),
-            estado: $('#task-status').val()
-        };
-
-        $.ajax({
-            url: 'http://127.0.0.1:8000/services/tareas/',  // Ruta de la API para crear una nueva tarea
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function(response) {
-                cargarTareas();  // Recargar la lista de tareas después de agregar una nueva
-                $('#task-form').trigger('reset');  // Limpiar el formulario
-            },
-            error: function(error) {
-                console.error('Error al agregar tarea:', error);
-            }
-        });
+    // Asignar la función de creación de tarea al clic del botón
+    btnform.off("click").click(function() {
+        crearTarea(); // Llamar a la función para crear tarea
     });
 
-    // Evento para eliminar una tarea
-    $(document).on('click', '.eliminar-task', function() {
-        var taskId = $(this).data('id');
-        
-        // Mostrar modal de confirmación
-        $('#confirmDeleteModal').modal('show');
+    // Mostrar la modal
+    $('#agregarTareaModal').modal('show');
+}
 
-        // Confirmar la eliminación de la tarea
-        $('#confirm-delete').click(function() {
+// Función para crear una tarea
+function crearTarea() {
+    var formData = {
+        titulo: $('#task-title').val(),
+        descripcion: $('#task-desc').val(),
+        fechaVencimiento: $('#task-deadline').val(),
+        estado: 'Pendiente', // Estado inicial
+        idUsuario: '' // IdUsuario inicialmente vacío
+    };
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/services/tareas/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            mostrarAlertaExito('La tarea se ha creado correctamente.');
+            $('#task-form').trigger('reset'); // Limpiar el formulario
+            $('#agregarTareaModal').modal('hide'); // Cerrar la modal
+            consultartareas(); // Volver a cargar las tareas
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al crear la tarea:', xhr.responseText);
+            mostrarAlertaError('Hubo un problema al crear la tarea. Inténtelo de nuevo.');
+        }
+    });
+}
+
+
+// Función para mostrar una alerta de éxito
+function mostrarAlertaExito(mensaje) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: mensaje,
+        showConfirmButton: false,
+        timer: 2500
+    });
+}
+
+// Función para mostrar una alerta de error
+function mostrarAlertaError(mensaje) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: mensaje
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$(document).on('click', '.eliminar-task', function() {
+    var taskId = $(this).data('id');
+    
+    // Mostrar modal de confirmación
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¿Estás seguro de eliminar la tarea?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d5c429',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Realizar la solicitud de eliminación AJAX
             $.ajax({
-                url: `http://localhost:8000/services/tareas/${taskId}/`,  // Ruta de la API para eliminar la tarea
+                url: `http://127.0.0.1:8000/services/tareas/${taskId}/`,  // Ruta de la API para eliminar la tarea
                 method: 'DELETE',
                 success: function(response) {
-                    cargarTareas();  // Recargar la lista de tareas después de eliminar
-                    $('#confirmDeleteModal').modal('hide');  // Ocultar el modal de confirmación
+                    Swal.fire('Eliminado', 'La tarea ha sido eliminada correctamente', 'success');
+                    // Recargar la tabla de tareas después de eliminar
+                    consultartareas(); // Asegúrate de llamar a tu función para cargar las tareas
                 },
                 error: function(error) {
                     console.error('Error al eliminar tarea:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al eliminar tarea',
+                        text: 'Hubo un problema al intentar eliminar la tarea. Inténtelo de nuevo más tarde.'
+                    });
                 }
             });
-        });
+        }
     });
+});
 
-    // Eventos para editar una tarea (abrir el modal y guardar cambios)
-    $(document).on('click', '.editar-task', function() {
-        var taskId = $(this).data('id');
-        
-        // Llamar a la API para obtener los detalles de la tarea
-        $.ajax({
-            url: `http://localhost:8000/services/tareas/${taskId}/`,  // Ruta de la API para obtener detalles de la tarea
-            method: 'GET',
-            success: function(data) {
-                // Llenar el formulario de edición con los datos de la tarea
-                $('#edit-task-title').val(data.titulo);
-                $('#edit-task-desc').val(data.descripcion);
 
-                // Mostrar el modal de edición
-                $('#editTaskModal').modal('show');
-            },
-            error: function(error) {
-                console.error('Error al cargar detalles de la tarea:', error);
-            }
-        });
 
-        // Guardar cambios en la tarea
-        $('#save-changes').click(function() {
-            var formData = {
-                titulo: $('#edit-task-title').val(),
-                descripcion: $('#edit-task-desc').val()
-            };
 
-            $.ajax({
-                url: `http://localhost:8000/services/tareas/${taskId}/`,  // Ruta de la API para actualizar la tarea
-                method: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    cargarTareas();  // Recargar la lista de tareas después de editar
-                    $('#editTaskModal').modal('hide');  // Ocultar el modal de edición
-                },
-                error: function(error) {
-                    console.error('Error al guardar cambios en la tarea:', error);
-                }
-            });
-        });
+function EditarTareaClick(button) {
+    var taskId = $(button).data('id');
+
+    // Aquí deberías obtener los datos de la tarea usando el ID.
+    // Asumiendo que tienes una función o una forma de obtener los datos de la tarea.
+    var taskData = obtenerDatosTarea(taskId);
+    EditarTarea(taskData);
+}
+
+function obtenerDatosTarea(taskId) {
+    // Supongamos que tienes una lista de tareas en tu script o quieres obtenerlo del servidor
+    // Esto es solo un ejemplo, ajusta según tu implementación
+    var taskData;
+    $.ajax({
+        url: `http://127.0.0.1:8000/services/tareas/${taskId}/`,
+        method: 'GET',
+        async: false,  // Usamos async: false para que la llamada sea síncrona (no recomendado en producción)
+        success: function (response) {
+            taskData = response;
+        },
+        error: function (error) {
+            console.error('Error al obtener los datos de la tarea:', error);
+        }
     });
+    return taskData;
+}
 
-    // Eventos para asignar usuario a una tarea (abrir el modal y confirmar asignación)
-    $(document).on('click', '.asignar-usuario', function() {
-        var taskId = $(this).data('id');
+function mostrarFormularioActualizarTarea() {
+    var titulo = $("#editTaskModalLabel");
+    titulo.text("Editar Tarea");
+    var btnGuardar = $("#save-changes");
+    btnGuardar.text("Guardar cambios");
+}
 
-        // Llamar a la API para obtener la lista de usuarios disponibles
+
+function EditarTarea(taskData) {
+    mostrarFormularioActualizarTarea();
+    $('#edit-task-title').val(taskData.titulo);
+    $('#edit-task-desc').val(taskData.descripcion);
+    
+    // Formatear la fecha para mostrarla en el input de tipo datetime-local
+    var fechaVencimiento = moment(taskData.fechaVencimiento).format('YYYY-MM-DDTHH:mm');
+    $('#edit-task-deadline').val(fechaVencimiento);
+
+    $('#editTaskModal').modal('show');
+
+    var btnSaveChanges = $("#save-changes");
+    btnSaveChanges.off("click").click(function () {
+        var formData = {
+            titulo: $('#edit-task-title').val(),
+            descripcion: $('#edit-task-desc').val(),
+            fechaVencimiento: $('#edit-task-deadline').val(),
+        };
+
         $.ajax({
-            url: 'http://localhost:8000/services/usuarios/',  // Ruta de la API para obtener la lista de usuarios
-            method: 'GET',
-            success: function(usuarios) {
-                var selectOptions = '';
-                $.each(usuarios, function(index, usuario) {
-                    selectOptions += `<option value="${usuario.id}">${usuario.nombre} ${usuario.apellido}</option>`;
+            url: `http://127.0.0.1:8000/services/tareas/${taskData.id}/`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (response) {
+                // Recargar la lista de tareas después de editar
+                consultartareas();
+                $('#editTaskModal').modal('hide');  // Ocultar el modal de edición
+
+                Swal.fire({
+                    title: 'Éxito',
+                    text: 'Los cambios han sido guardados correctamente.',
+                    icon: 'success',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Aceptar'
                 });
-                $('#assign-user').html(selectOptions);
-
-                // Mostrar el modal de asignación de usuario
-                $('#assignUserModal').modal('show');
             },
-            error: function(error) {
-                console.error('Error al cargar la lista de usuarios:', error);
+            error: function (error) {
+                console.error('Error al guardar cambios en la tarea:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al guardar los cambios.',
+                    icon: 'error',
+                    showCancelButton: false,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Aceptar'
+                });
             }
         });
-
-        // Confirmar la asignación de usuario a la tarea
-        $('#confirm-assign-user').click(function() {
-            var userId = $('#assign-user').val();
-
-            $.ajax({
-                url: `http://localhost:8000/services/tareas/${taskId}/asignar-usuario/`,  // Ruta de la API para asignar usuario a la tarea
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ usuario_id: userId }),
-                success: function(response) {
-                    cargarTareas();  // Recargar la lista de tareas después de asignar usuario
-                    $('#assignUserModal').modal('hide');  // Ocultar el modal de asignación de usuario
-                },
-                error: function(error) {
-                    console.error('Error al asignar usuario a la tarea:', error);
-                }
-            });
-        });
     });
+}
+
+
+
+
+
+
+
+function mostrarModalAsignarUsuario(taskId) {
+    // Guardar el ID de la tarea en un atributo de datos del botón
+    $('#confirm-assign-user').data('task-id', taskId);
+
+    // Cargar dinámicamente los usuarios en el select
+    $.ajax({
+        url: 'http://127.0.0.1:8000/services/usuarios/', // URL para obtener la lista de usuarios
+        method: 'GET',
+        success: function(response) {
+            console.log('Respuesta del servidor:', response); // Depuración
+            var usuarios = response; // Ajusta según la estructura real
+            if (!usuarios || usuarios.length === 0) {
+                console.error('No se encontraron usuarios en la respuesta.');
+                mostrarAlertaError('No se encontraron usuarios en la respuesta.');
+                return;
+            }
+            var select = $('#assign-user');
+            select.empty();
+            usuarios.forEach(function(usuario) {
+                select.append('<option value="' + usuario.id + '">' + usuario.nombre + ' ' + usuario.apellido + '</option>');
+            });
+            // Mostrar el modal
+            $('#assignUserModal').modal('show');
+        },
+        error: function(error) {
+            console.error('Error al cargar los usuarios:', error);
+            mostrarAlertaError('Hubo un problema al cargar los usuarios. Inténtelo de nuevo.');
+        }
+    });
+}
+
+
+
+$('#confirm-assign-user').click(function() {
+    var taskId = $(this).data('task-id');
+    var userId = $('#assign-user').val();
+
+    if (!userId) {
+        mostrarAlertaError('Seleccione un usuario.');
+        return;
+    }
+
+    var formData = {
+        idUsuario: userId
+    };
+
+    console.log('Datos enviados:', formData);
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/services/tareas/' + taskId + '/',
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            mostrarAlertaExito('El usuario ha sido asignado correctamente a la tarea.');
+            $('#assign-user-form').trigger('reset'); // Limpiar el formulario
+            $('#assignUserModal').modal('hide'); // Cerrar la modal
+            consultartareas(); // Volver a cargar las tareas
+        },
+        error: function(error) {
+            console.error('Error al asignar el usuario a la tarea:', error);
+            mostrarAlertaError('Hubo un problema al asignar el usuario. Inténtelo de nuevo.');
+        }
+    });
+});
+
+
+
+function mostrarAlertaExito(mensaje) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: mensaje,
+        showConfirmButton: false,
+        timer: 2500
+    });
+}
+
+function mostrarAlertaError(mensaje) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: mensaje
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Eventos para cambiar estado de una tarea
-    $(document).on('click', '.cambiar-estado', function() {
-        var taskId = $(this).data('id');
-
-        // Llamar a la API para cambiar el estado de la tarea
+    function mostrarModalCambiarEstado(taskId) {
+        // Preparar el modal para mostrar el título adecuado
+        var titulo = $("#changeStatusModalLabel");
+        titulo.text("Cambiar Estado de Tarea");
+    
+        // Preparar el botón de confirmación
+        var btnConfirmar = $("#confirm-change-status");
+        btnConfirmar.text("Cambiar Estado");
+    
+        // Asignar el evento click al botón de confirmación
+        btnConfirmar.off("click").click(function() {
+            cambiarEstadoTarea(taskId); // Llamar a la función para cambiar el estado
+        });
+    
+        // Mostrar el modal
+        $('#changeStatusModal').modal('show');
+    }
+    
+    // Función para cambiar el estado de la tarea
+    function cambiarEstadoTarea(taskId) {
+        var nuevoEstado = $('#task-status').val();
+    
+        var formData = {
+            estado: nuevoEstado
+        };
+    
         $.ajax({
-            url: `http://localhost:8000/services/tareas/${taskId}/cambiar-estado/`,  // Ruta de la API para cambiar estado de la tarea
-            method: 'POST',
+            url: 'http://127.0.0.1:8000/services/tareas/' + taskId + '/',
+            method: 'PUT', // Usar PUT para actualizar el estado
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
             success: function(response) {
-                cargarTareas();  // Recargar la lista de tareas después de cambiar estado
+                mostrarAlertaExito('El estado de la tarea ha sido actualizado correctamente.');
+                $('#change-status-form').trigger('reset'); // Limpiar el formulario
+                $('#changeStatusModal').modal('hide'); // Cerrar la modal
+                consultartareas(); // Volver a cargar las tareas
             },
             error: function(error) {
-                console.error('Error al cambiar estado de la tarea:', error);
+                console.error('Error al cambiar el estado de la tarea:', error);
+                mostrarAlertaError('Hubo un problema al cambiar el estado de la tarea. Inténtelo de nuevo.');
             }
         });
-    });
+    }
+    
 
 
