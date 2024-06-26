@@ -21,13 +21,19 @@
         <h1 class="my-4 text-center">Panel de Control de Tareas</h1>
         <!-- Agrega un elemento HTML con el nombre de usuario como atributo data -->
     <div id="username" data-username="{{ user.correo }}"></div>
-        <!-- Sección para crear una nueva tarea -->
-        <div id="resultadoCrear"></div>
-        <div class="card mb-4">
-            <div class="card-header">
-                {{ user.nombre }} {{ user.apellido }} Crea una Tarea
+
+    
+<!-- Modal para agregar tarea -->
+<div class="modal fade" id="agregarTareaModal" tabindex="-1" aria-labelledby="agregarTareaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarTareaModalLabel">{{ user.nombre }} {{ user.apellido }} Crea una Tarea</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="card-body">
+            <div class="modal-body">
                 <form id="task-form">
                     <div class="form-group">
                         <label for="task-title">Título</label>
@@ -41,11 +47,25 @@
                         <label for="task-deadline">Fecha de Vencimiento</label>
                         <input type="datetime-local" class="form-control" id="task-deadline" required>
                     </div>
-                    <input type="hidden" id="task-status" value="pendiente">
-                    <button type="submit" class="btn btn-primary">Agregar Tarea</button>
                 </form>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-form-tarea">Agregar Tarea</button>
+            </div>
         </div>
+    </div>
+</div>
+
+
+
+<!-- Botón para abrir la modal de agregar tarea -->
+<button type="button" class="btn btn-primary" onclick="mostrarFormularioCrearTarea()">
+    Agregar Tarea
+</button>
+
+
+  
 
         <!-- Sección para listar las tareas -->
         <div class="card">
@@ -76,8 +96,8 @@
     </div>
 
     <!-- Modal para editar tareas -->
-    <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editTaskModalLabel">Editar Tarea</h5>
@@ -86,45 +106,29 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="edit-task-form">
+                    <form>
                         <div class="form-group">
                             <label for="edit-task-title">Título</label>
                             <input type="text" class="form-control" id="edit-task-title" required>
                         </div>
                         <div class="form-group">
                             <label for="edit-task-desc">Descripción</label>
-                            <textarea class="form-control" id="edit-task-desc" rows="3"></textarea>
+                            <textarea class="form-control" id="edit-task-desc" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-task-deadline">Fecha Límite</label>
+                            <input type="datetime-local" class="form-control" id="edit-task-deadline" required>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-primary" id="save-changes">Guardar cambios</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal para confirmar eliminación de tarea -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>¿Estás seguro de que deseas eliminar esta tarea?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete">Eliminar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal para asignar usuario a la tarea -->
     <div class="modal fade" id="assignUserModal" tabindex="-1" aria-labelledby="assignUserModalLabel" aria-hidden="true">
@@ -141,7 +145,7 @@
                         <div class="form-group">
                             <label for="assign-user">Seleccionar Usuario</label>
                             <select class="form-control" id="assign-user" required>
-                                <!-- Opciones de usuarios se cargarán aquí dinámicamente -->
+                                <!-- Opciones de usuarios se cargarán dinámicamente aquí -->
                             </select>
                         </div>
                     </form>
@@ -153,6 +157,37 @@
             </div>
         </div>
     </div>
+    
+
+    <div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeStatusModalLabel">Cambiar Estado de Tarea</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="change-status-form">
+                        <div class="form-group">
+                            <label for="task-status">Estado</label>
+                            <select class="form-control" id="task-status" required>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En proceso">En Proceso</option>
+                                <option value="Completada">Completada</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-change-status">Cambiar Estado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Scripts JS al final del cuerpo -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
@@ -161,6 +196,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
     <script src="../static/js/tarea.js"></script>
 
     <!-- Script adicional si es necesario -->

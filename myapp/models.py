@@ -36,10 +36,12 @@ class Tarea(models.Model):
     titulo = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=200, blank=True)
     fechaVencimiento = models.DateTimeField(default=timezone.now)  # Valor predeterminado usando timezone.now
-    estado = models.CharField(max_length=30, choices=(('pendiente', 'Pendiente'), ('en_proceso', 'En Proceso'), ('completada', 'Completada')), default='pendiente')
+    estado = models.CharField(max_length=30) 
 
     def __str__(self):
         return self.titulo
+
+
 
 class HistorialTarea(models.Model):
     idTarea = models.ForeignKey(Tarea, on_delete=models.CASCADE)
