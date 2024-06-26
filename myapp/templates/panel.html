@@ -21,17 +21,11 @@
         <h1 class="my-4 text-center">Panel de Control de Tareas</h1>
         <!-- Agrega un elemento HTML con el nombre de usuario como atributo data -->
     <div id="username" data-username="{{ user.correo }}"></div>
-
-    
-<!-- Modal para agregar tarea -->
-<div class="modal fade" id="agregarTareaModal" tabindex="-1" aria-labelledby="agregarTareaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarTareaModalLabel">{{ user.nombre }} {{ user.apellido }} Crea una Tarea</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <!-- Sección para crear una nueva tarea -->
+        <div id="resultadoCrear"></div>
+        <div class="card mb-4">
+            <div class="card-header">
+                {{ user.nombre }} {{ user.apellido }} Crea una Tarea
             </div>
             <div class="modal-body">
                 <form id="task-form">

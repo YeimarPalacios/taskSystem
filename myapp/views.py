@@ -128,3 +128,29 @@ def render_task_item(request):
         return JsonResponse({'html': html})
     return JsonResponse({'error': 'Método no permitido'})
         
+def logout_view(request):
+    print("invoque al logout:::::::::")
+    if request.method == 'POST':
+    # Obtener el token de acceso de la sesión del usuario
+        authorization_data = request.session.get('authorization', None)
+        print("logaut---------")
+        if authorization_data:
+            access_token = authorization_data['access_token']
+            print(access_token)
+            # Llamar a la API de cierre de sesión
+            response = requests.post(
+                f'{settings.API_BASE_URL}/authorization/api/logout/',
+                # json=serialized_data
+                json={'access_token': access_token}
+            )
+            
+            if response.status_code == 200:
+                # Eliminar la información de autorización de la sesión
+                del request.session['authorization']
+                return redirect('login')
+            else:
+                return JsonResponse(response.json())
+        else:
+            return JsonResponse({'error': 'no esta autenticado'})
+
+    # return redirect('login')

@@ -80,7 +80,7 @@ class RefreshTokenView(APIView):
             return Response({"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LogoutView(APIView):
-    def post(self, request):
+     def post(self, request):
         access_token = request.data.get('access_token')
         try:
             oauth = Oauth.objects.get(access_token=access_token)
@@ -88,3 +88,6 @@ class LogoutView(APIView):
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         except Oauth.DoesNotExist:
             return Response({"error": "Invalid access token"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    
