@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                const taskItem = listItem.firstChild;
                 taskList.appendChild(taskItem);
-   //
             })
             .catch(error => {
                 console.error('Error:', error);
