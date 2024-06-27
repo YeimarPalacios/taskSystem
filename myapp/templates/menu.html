@@ -20,11 +20,9 @@
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Usuario
+                    {{ user.nombre }} {{ user.apellido }}  
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Perfil</a>
-                    <a class="dropdown-item" href="#">Configuración</a>
+                <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown" style="min-width: 200px;">
                     <div class="dropdown-divider"></div>
                     <!-- Formulario para cerrar sesión -->
                     <form method="post" action="{% url 'logout' %}">
@@ -33,6 +31,7 @@
                     </form>
                 </div>
             </li>
+            
         </ul>
     </div>
 </nav>

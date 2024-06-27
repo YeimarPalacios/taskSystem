@@ -12,5 +12,5 @@ urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
     path('historialTarea/', views.historialTarea_View, name='historialTarea'),
     path('ws/', include(routing.websocket_urlpatterns)),  # Rutas WebSocket de tu aplicación
-    path('render_task_item/', views.render_task_item, name='render_task_item'),
+    path('asignar_tarea/', views.asignar_tarea, name='asignar_tarea'),
 ]
