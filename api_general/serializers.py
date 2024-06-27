@@ -15,4 +15,4 @@ class TareaSerializer(serializers.ModelSerializer):
 class HistorialTareaSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialTarea
-        fields = ['idTarea', 'detalle']
+        fields = ['id','idTarea', 'detalle']
