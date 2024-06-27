@@ -159,7 +159,7 @@ function onErrortarea(xhr, status, error) {
 
 
 // Función para agregar una nueva tarea
-function mostrarFormularioCrearTarea() {
+function mostrarFormularioCrearTarea(nombreUsuario, apellidoUsuario) {
     // Cambiar el título del formulario
     var titulo = $("#agregarTareaModalLabel");
     titulo.text("Agregar Tarea");
@@ -170,7 +170,7 @@ function mostrarFormularioCrearTarea() {
 
     // Asignar la función de creación de tarea al clic del botón
     btnform.off("click").click(function() {
-        crearTarea(); // Llamar a la función para crear tarea
+        crearTarea(nombreUsuario, apellidoUsuario); // Llamar a la función para crear tarea
     });
 
     // Mostrar la modal
@@ -178,7 +178,7 @@ function mostrarFormularioCrearTarea() {
 }
 
 // Función para crear una tarea
-function crearTarea() {
+function crearTarea(nombreUsuario, apellidoUsuario) {
     var formData = {
         titulo: $('#task-title').val(),
         descripcion: $('#task-desc').val(),
@@ -196,11 +196,37 @@ function crearTarea() {
             mostrarAlertaExito('La tarea se ha creado correctamente.');
             $('#task-form').trigger('reset'); // Limpiar el formulario
             $('#agregarTareaModal').modal('hide'); // Cerrar la modal
+ 
+            var detalleHistorial = 'Se creó la tarea por ' + nombreUsuario + ' ' + apellidoUsuario; // Construir el detalle
+            crearHistorialTareaCrear(response.id, detalleHistorial);
             consultartareas(); // Volver a cargar las tareas
         },
         error: function(xhr, status, error) {
             console.error('Error al crear la tarea:', xhr.responseText);
             mostrarAlertaError('Hubo un problema al crear la tarea. Inténtelo de nuevo.');
+        }
+    });
+}
+
+function crearHistorialTareaCrear(idTarea, detalleHistorial) {
+    var formData = {
+        idTarea: idTarea,
+        detalle: detalleHistorial
+    };
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/services/historial_tareas/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            mostrarAlertaExito('El historial de tarea se ha creado correctamente.');
+            // Limpiar el formulario y cerrar la modal del historial si es necesario
+            // consultarHistorialTareas(); // Volver a cargar el historial de tareas si es necesario
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al crear el historial de tarea:', xhr.responseText);
+            mostrarAlertaError('Hubo un problema al crear el historial de tarea. Inténtelo de nuevo.');
         }
     });
 }
@@ -340,6 +366,7 @@ function EditarTarea(taskData) {
             success: function (response) {
                 // Recargar la lista de tareas después de editar
                 consultartareas();
+                crearHistorialTarea(response.id); 
                 $('#editTaskModal').modal('hide');  // Ocultar el modal de edición
 
                 Swal.fire({
@@ -366,6 +393,29 @@ function EditarTarea(taskData) {
     });
 }
 
+
+function crearHistorialTarea(idTarea) {
+    var formData = {
+        idTarea: idTarea,
+        detalle: 'Se modificó la tarea'
+    };
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/services/historial_tareas/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            mostrarAlertaExito('El historial de tarea se ha creado correctamente.');
+            // Limpiar el formulario y cerrar la modal del historial si es necesario
+            // consultarHistorialTareas(); // Volver a cargar el historial de tareas si es necesario
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al crear el historial de tarea:', xhr.responseText);
+            mostrarAlertaError('Hubo un problema al crear el historial de tarea. Inténtelo de nuevo.');
+        }
+    });
+}
 
 
 
@@ -508,6 +558,9 @@ function mostrarAlertaError(mensaje) {
                 $('#change-status-form').trigger('reset'); // Limpiar el formulario
                 $('#changeStatusModal').modal('hide'); // Cerrar la modal
                 consultartareas(); // Volver a cargar las tareas
+                if (nuevoEstado === 'completada' || nuevoEstado === 'Completada') {
+                    crearHistorialTareaEstado(taskId);
+                }
             },
             error: function(error) {
                 console.error('Error al cambiar el estado de la tarea:', error);
@@ -516,5 +569,27 @@ function mostrarAlertaError(mensaje) {
         });
     }
     
+    function crearHistorialTareaEstado(idTarea) {
+        var formData = {
+            idTarea: idTarea,
+            detalle: 'Tarea completada'
+        };
+    
+        $.ajax({
+            url: 'http://127.0.0.1:8000/services/historial_tareas/',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                mostrarAlertaExito('El historial de tarea se ha creado correctamente.');
+                // Limpiar el formulario y cerrar la modal del historial si es necesario
+                // consultarHistorialTareas(); // Volver a cargar el historial de tareas si es necesario
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al crear el historial de tarea:', xhr.responseText);
+                mostrarAlertaError('Hubo un problema al crear el historial de tarea. Inténtelo de nuevo.');
+            }
+        });
+    }
 
 
