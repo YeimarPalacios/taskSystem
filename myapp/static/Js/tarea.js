@@ -360,7 +360,7 @@ function EditarTarea(taskData) {
 
         $.ajax({
             url: `http://127.0.0.1:8000/services/tareas/${taskData.id}/`,
-            method: 'PUT',
+            method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
             success: function (response) {

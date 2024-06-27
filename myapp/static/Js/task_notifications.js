@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = JSON.parse(event.data);
         console.log(data)
         showNotification(data.message);
+        updateNotificationsList(data.message);
     };
 
     function showNotification(message, type = 'success') {
@@ -28,6 +29,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function updateNotificationsList(message) {
+        const notificationsList = document.getElementById('notifications-list');
+        const notificationCount = document.getElementById('notification-count');
+        const newNotification = document.createElement('div');
+        newNotification.classList.add('dropdown-item');
+        newNotification.textContent = message;
+
+        if (notificationsList.textContent === 'No hay notificaciones') {
+            notificationsList.textContent = '';
+        }
+
+        notificationsList.prepend(newNotification);
+        notificationCount.textContent = parseInt(notificationCount.textContent) + 1;
+    }
     
   
 });
