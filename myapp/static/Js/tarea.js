@@ -562,9 +562,23 @@ function mostrarAlertaError(mensaje) {
     }
     
     function crearHistorialTareaEstado(idTarea) {
+        // Obtener la fecha y hora actual del sistema
+        var now = new Date();
+        var formattedDate = now.toLocaleString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    
+        // Construir el detalle con la fecha y hora
+        var detalle = `Tarea completada el ${formattedDate}`;
+    
         var formData = {
             idTarea: idTarea,
-            detalle: 'Tarea completada'
+            detalle: detalle
         };
     
         $.ajax({
@@ -583,5 +597,6 @@ function mostrarAlertaError(mensaje) {
             }
         });
     }
+    
 
 
