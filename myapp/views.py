@@ -97,36 +97,50 @@ def registro_view(request):
 
 # @csrf_exempt
 # @require_authentication
-def render_task_item(request):
+def asignar_tarea(request):
     if request.method == 'GET':
-        title = request.GET.get('title')
-        desc = request.GET.get('desc')
-        assign_email = request.GET.get('assign')
-        print("correo antes de quitar el @")
-        print(assign_email)
-
-        correo = re.sub(r'[^\w.-]', '', assign_email)[:100]
-        print("correo despues de quitar el @")
-        print(correo)
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f'user_{correo}',
-            {
-                'type': 'send_notification',
-                'message': f'Nueva tarea asignada: {title}'
+        # title = request.GET.get('title')
+        assign_task = request.GET.get('taskId')
+        assign_user = request.GET.get('userId')
+        
+        print("userId antes de quitar el @")
+        print(assign_user)
+        print(assign_task)
+        serialized_data = {
+                'idUsuario': assign_user
             }
+        response = requests.put(
+                f'{settings.API_BASE_URL}/services/tareas/{assign_task}/',
+                json=serialized_data
+            )
+
+        if response.status_code == 200:
+            user = response.json()
+            correo = re.sub(r'[^\w.-]', '', user['correo'])[:100]
+            tarea_nombre=  user['tarea']['titulo']
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'user_{correo}',
+                {
+                    'type': 'send_notification',
+                    'message': f'Nueva tarea asignada: { tarea_nombre }'
+                }
         )
 
-        context = {
-            'title': title,
-            'desc': desc,
-            'assign': assign_email,
-            'user': correo
-        }
+        return JsonResponse(response.json())
 
-        html = render_to_string('task_item.html', context=context)
-        return JsonResponse({'html': html})
-    return JsonResponse({'error': 'Método no permitido'})
+       
+
+    #     context = {
+    #         'title': title,
+    #         'desc': desc,
+    #         'assign': assign_email,
+    #         'user': correo
+    #     }
+
+    #     html = render_to_string('task_item.html', context=context)
+    #     return JsonResponse({'html': html})
+    # return JsonResponse({'error': 'Método no permitido'})
         
 def logout_view(request):
     print("invoque al logout:::::::::")
