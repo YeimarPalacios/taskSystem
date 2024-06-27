@@ -464,27 +464,19 @@ $('#confirm-assign-user').click(function() {
         return;
     }
 
-    var formData = {
-        idUsuario: userId
-    };
 
-    console.log('Datos enviados:', formData);
-
-    $.ajax({
-        url: 'http://127.0.0.1:8000/services/tareas/' + taskId + '/',
-        method: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify(formData),
-        success: function(response) {
-            mostrarAlertaExito('El usuario ha sido asignado correctamente a la tarea.');
-            $('#assign-user-form').trigger('reset'); // Limpiar el formulario
-            $('#assignUserModal').modal('hide'); // Cerrar la modal
-            consultartareas(); // Volver a cargar las tareas
-        },
-        error: function(error) {
-            console.error('Error al asignar el usuario a la tarea:', error);
-            mostrarAlertaError('Hubo un problema al asignar el usuario. Inténtelo de nuevo.');
-        }
+    fetch(`/asignar_tarea/?userId=${userId}&taskId=${taskId}`)
+    .then(response => response.json())
+    .then(data => {
+        mostrarAlertaExito('El usuario ha sido asignado correctamente a la tarea.');
+        $('#assign-user-form').trigger('reset'); // Limpiar el formulario
+        $('#assignUserModal').modal('hide'); // Cerrar la modal
+        consultartareas(); // Volver a cargar las tareas
+    })
+    .catch(error => {
+        console.error('Error al asignar el usuario a la tarea:', error);
+        mostrarAlertaError('Hubo un problema al asignar el usuario. Inténtelo de nuevo.');
+    
     });
 });
 
