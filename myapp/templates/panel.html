@@ -23,49 +23,49 @@
     <div class="container">
         <h1 class="my-4 text-center">Panel de Control de Tareas</h1>
         <!-- Agrega un elemento HTML con el nombre de usuario como atributo data -->
-    <div id="username" data-username="{{ user.correo }}"></div>
+        <div id="username" data-username="{{ user.correo }}"></div>
 
-    
-<!-- Modal para agregar tarea -->
-<div class="modal fade" id="agregarTareaModal" tabindex="-1" aria-labelledby="agregarTareaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarTareaModalLabel"> Crea una Tarea</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="task-form">
-                    <div class="form-group">
-                        <label for="task-title">Título</label>
-                        <input type="text" class="form-control" id="task-title" placeholder="Título de la tarea" required>
+
+        <!-- Modal para agregar tarea -->
+        <div class="modal fade" id="agregarTareaModal" tabindex="-1" aria-labelledby="agregarTareaModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="agregarTareaModalLabel"> Crea una Tarea</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label for="task-desc">Descripción</label>
-                        <textarea class="form-control" id="task-desc" rows="3" placeholder="Descripción de la tarea"></textarea>
+                    <div class="modal-body">
+                        <form id="task-form">
+                            <div class="form-group">
+                                <label for="task-title">Título</label>
+                                <input type="text" class="form-control" id="task-title" placeholder="Título de la tarea" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-desc">Descripción</label>
+                                <textarea class="form-control" id="task-desc" rows="3" placeholder="Descripción de la tarea"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-deadline">Fecha de Vencimiento</label>
+                                <input type="datetime-local" class="form-control" id="task-deadline" required>
+                            </div>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="task-deadline">Fecha de Vencimiento</label>
-                        <input type="datetime-local" class="form-control" id="task-deadline" required>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" id="btn-form-tarea">Agregar Tarea</button>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-form-tarea">Agregar Tarea</button>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
 
 
-<!-- Botón para abrir la modal de agregar tarea -->
-<button type="button" class="btn btn-primary" onclick="mostrarFormularioCrearTarea('{{ user.nombre }}', '{{ user.apellido }}')">
-    Agregar Tarea
-</button>
+        <!-- Botón para abrir la modal de agregar tarea -->
+        <button type="button" class="btn btn-primary" onclick="mostrarFormularioCrearTarea('{{ user.nombre }}', '{{ user.apellido }}')">
+            Agregar Tarea
+        </button>
 
 
   
