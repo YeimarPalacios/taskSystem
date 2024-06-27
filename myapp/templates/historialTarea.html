@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+</head>
+<body>
+    {% include 'menu.html' %}
+    <div class="container">
+        <h1 class="my-4 text-center">Historial de Tareas</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                Historial
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="tablaHistorialTarea" class="table w-100">
+                        <thead class="text-center">
+                            <tr>
+                                <th>#</th>
+                                <th>idTarea</th>
+                                <th>Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <!-- Aquí se cargarán dinámicamente las filas de la tabla -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+
+
+
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="../static/js/historialTarea.js"></script>
+</body>
+
+
+</html>

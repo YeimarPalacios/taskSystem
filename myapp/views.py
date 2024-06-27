@@ -60,6 +60,17 @@ def panel_view(request):
     user_data = authorization_data['user']
     return render(request, 'panel.html', {'user': user_data})
 
+def historialTarea_View(request):
+     # Obtén el token JWT almacenado en la sesión
+    authorization_data = request.session.get('authorization', None)
+    if authorization_data is None:
+        # Si no hay token JWT, redirige al login
+        return redirect('login')
+
+    user_data = authorization_data['user']
+    return render(request, 'historialTarea.html', {'user': user_data})
+
+
 def registro_view(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)

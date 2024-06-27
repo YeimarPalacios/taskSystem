@@ -10,6 +10,7 @@ urlpatterns = [
     path('menu/', views.menu_view, name='menu'),
     path('panel/', views.panel_view, name='panel'),
     path('registro/', views.registro_view, name='registro'),
+    path('historialTarea/', views.historialTarea_View, name='historialTarea'),
     path('ws/', include(routing.websocket_urlpatterns)),  # Rutas WebSocket de tu aplicación
     path('render_task_item/', views.render_task_item, name='render_task_item'),
 ]
