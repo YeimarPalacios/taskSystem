@@ -5,7 +5,7 @@ from .task_views import (
     TareaListCreateAPIView,
     TareaRetrieveUpdateDestroyAPIView,
 )
-from .historialTarea_views import HistorialTareaListCreateAPIView
+from .historialTarea_views import HistorialTareaListCreateAPIView, HistorialTareaDetailAPIView
 
 urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('tareas/<int:pk>/', TareaRetrieveUpdateDestroyAPIView.as_view(), name='tarea-detail'),
 
     path('historial_tareas/', HistorialTareaListCreateAPIView.as_view(), name='historial-tarea-list-create'),
+    path('historial_tareas/<int:idTarea>/', HistorialTareaDetailAPIView.as_view(), name='historial_tarea_detail'),
 ]

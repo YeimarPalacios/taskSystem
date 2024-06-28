@@ -17,3 +17,12 @@ class HistorialTareaListCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class HistorialTareaDetailAPIView(APIView):
+    def get_object(self, idTarea):
+        return HistorialTarea.objects.filter(idTarea=idTarea)
+
+    def get(self, request, idTarea):
+        historial_tareas = self.get_object(idTarea)
+        serializer = HistorialTareaSerializer(historial_tareas, many=True)
+        return Response(serializer.data)

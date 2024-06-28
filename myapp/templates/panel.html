@@ -86,6 +86,7 @@
                                 <th>Descripción</th>
                                 <th>Fecha de Vencimiento</th>
                                 <th>Estado</th>
+                                <th>Historial</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -97,6 +98,41 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="historialTareaModal" tabindex="-1" aria-labelledby="historialTareaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header, card-header" >
+                    <h3 class="mt-3 text-center" id="historialTareaModalLabel">Historial</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="tablaHistorialTarea" class="table w-100">
+                            <thead class="text-center">
+                                <tr>
+                                    <th>idTarea</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <!-- Aquí se cargarán dinámicamente las filas de la tabla -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+
+
+
+
+
+
+
 
     <!-- Modal para editar tareas -->
     <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
@@ -204,6 +240,10 @@
     <script src="../static/js/task_notifications.js"></script>
     <script src="../static/js/tarea.js"></script>
 
+    <script>
+        var nombreUsuario = "{{ user.nombre }}";
+        var apellidoUsuario = "{{ user.apellido }}";
+    </script>
     <!-- Script adicional si es necesario -->
     <script>
         // Script adicional aquí
