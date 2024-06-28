@@ -90,11 +90,11 @@ function onExitotarea(data) {
     // Limpiar y agregar filas a la DataTable
     dataTable.clear().draw();
     $.each(data, function (index, tarea) {
-        var boton0 = "<button class='btn btn-sm btn-primary editar-task' data-id='" + tarea.id + "' onclick='EditarTareaClick(this)'><i class='bi bi-pen-fill'></i></button>";
+        var boton0 = "<button class='btn btn-sm btn-primary editar-task' data-id='" + tarea.id + "' onclick='EditarTareaClick(this, \"" + nombreUsuario + "\", \"" + apellidoUsuario + "\")'><i class='bi bi-pen-fill'></i></button>";
         var boton1 = "<button class='btn btn-sm btn-danger eliminar-task' data-id='" + tarea.id + "'><i class='bi bi-trash'></i></button>";
         var boton2 = `<button class='btn btn-sm btn-success asignar-usuario' data-id='${tarea.id}' onclick='mostrarModalAsignarUsuario(${tarea.id})'><i class='bi bi-person-plus'></i></button>`;
         var boton3 = "<button class='btn btn-sm btn-warning cambiar-estado' data-id='" + tarea.id + "' onclick='mostrarModalCambiarEstado(" + tarea.id + ")'><i class='bi bi-check'></i></button>";
-
+        var boton4 = "<button class='btn btn-sm btn-info ver-historial' data-id='" + tarea.id + "' onclick='mostrarHistorialTarea(" + tarea.id + ")'><i class='bi bi-clock-history'></i></button>";
         // Obtener nombre y apellido del usuario si idUsuario no es null
         if (tarea.idUsuario) {
             obtenerNombreApellidoUsuario(tarea.idUsuario, function (nombreApellido) {
@@ -105,6 +105,7 @@ function onExitotarea(data) {
                     tarea.descripcion,
                     tarea.fechaVencimiento,
                     tarea.estado,
+                    boton4,
                     "<div class='boton-container'>" + boton0 +' '+ boton1 + "</div><div class='boton-container'>" + boton2 +' '+ boton3 + "</div>"
                 ]).draw(false);
             });
@@ -117,6 +118,7 @@ function onExitotarea(data) {
                 tarea.descripcion,
                 tarea.fechaVencimiento,
                 tarea.estado,
+                boton4,
                 "<div class='boton-container'>" + boton0 +' '+ boton1 + "</div><div class='boton-container'>" + boton2 +' '+ boton3 + "</div>"
             ]).draw(false);
         }
@@ -141,6 +143,72 @@ function onErrortarea(xhr, status, error) {
 
 
 
+function mostrarHistorialTarea(idTarea) {
+    $.ajax({
+        type: "GET",
+        url: "http://127.0.0.1:8000/services/historial_tareas/" + idTarea,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        success: function(data) {
+            // Destruir la DataTable existente si ya ha sido inicializada
+            if ($.fn.DataTable.isDataTable('#tablaHistorialTarea')) {
+                $('#tablaHistorialTarea').DataTable().destroy();
+            }
+
+            // Inicializar DataTable con las opciones y el idioma configurados
+            var dataTable = $('#tablaHistorialTarea').DataTable({
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>tip',
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                language: {
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+
+            // Limpiar y agregar filas a la DataTable
+            dataTable.clear().draw();
+            $.each(data, function (index, historial) {
+                dataTable.row.add([
+                    historial.idTarea,
+                    historial.detalle
+                ]).draw(false);
+            });
+
+            // Mostrar el modal
+            $('#historialTareaModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al cargar el historial de tareas:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar el historial de tareas',
+                text: 'Hubo un problema al cargar el historial de tareas. Inténtelo de nuevo más tarde.'
+            });
+        }
+    });
+}
 
 
 
@@ -304,13 +372,16 @@ $(document).on('click', '.eliminar-task', function() {
 
 
 
-function EditarTareaClick(button) {
+
+
+
+function EditarTareaClick(button, nombreUsuario, apellidoUsuario) {
     var taskId = $(button).data('id');
 
     // Aquí deberías obtener los datos de la tarea usando el ID.
     // Asumiendo que tienes una función o una forma de obtener los datos de la tarea.
     var taskData = obtenerDatosTarea(taskId);
-    EditarTarea(taskData);
+    EditarTarea(taskData, nombreUsuario, apellidoUsuario);
 }
 
 function obtenerDatosTarea(taskId) {
@@ -339,7 +410,7 @@ function mostrarFormularioActualizarTarea() {
 }
 
 
-function EditarTarea(taskData) {
+function EditarTarea(taskData, nombreUsuario, apellidoUsuario) {
     mostrarFormularioActualizarTarea();
     $('#edit-task-title').val(taskData.titulo);
     $('#edit-task-desc').val(taskData.descripcion);
@@ -366,7 +437,8 @@ function EditarTarea(taskData) {
             success: function (response) {
                 // Recargar la lista de tareas después de editar
                 consultartareas();
-                crearHistorialTarea(response.id); 
+                var detalleHistorialA = 'Se modificó la tarea por ' + nombreUsuario + ' ' + apellidoUsuario;
+                crearHistorialTarea(response.id, detalleHistorialA); 
                 $('#editTaskModal').modal('hide');  // Ocultar el modal de edición
 
                 Swal.fire({
@@ -394,10 +466,10 @@ function EditarTarea(taskData) {
 }
 
 
-function crearHistorialTarea(idTarea) {
+function crearHistorialTarea(idTarea, detalleHistorialA) {
     var formData = {
         idTarea: idTarea,
-        detalle: 'Se modificó la tarea'
+        detalle: detalleHistorialA
     };
 
     $.ajax({
@@ -464,19 +536,27 @@ $('#confirm-assign-user').click(function() {
         return;
     }
 
+    var formData = {
+        idUsuario: userId
+    };
 
-    fetch(`/asignar_tarea/?userId=${userId}&taskId=${taskId}`)
-    .then(response => response.json())
-    .then(data => {
-        mostrarAlertaExito('El usuario ha sido asignado correctamente a la tarea.');
-        $('#assign-user-form').trigger('reset'); // Limpiar el formulario
-        $('#assignUserModal').modal('hide'); // Cerrar la modal
-        consultartareas(); // Volver a cargar las tareas
-    })
-    .catch(error => {
-        console.error('Error al asignar el usuario a la tarea:', error);
-        mostrarAlertaError('Hubo un problema al asignar el usuario. Inténtelo de nuevo.');
-    
+    console.log('Datos enviados:', formData);
+
+    $.ajax({
+        url: 'http://127.0.0.1:8000/services/tareas/' + taskId + '/',
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            mostrarAlertaExito('El usuario ha sido asignado correctamente a la tarea.');
+            $('#assign-user-form').trigger('reset'); // Limpiar el formulario
+            $('#assignUserModal').modal('hide'); // Cerrar la modal
+            consultartareas(); // Volver a cargar las tareas
+        },
+        error: function(error) {
+            console.error('Error al asignar el usuario a la tarea:', error);
+            mostrarAlertaError('Hubo un problema al asignar el usuario. Inténtelo de nuevo.');
+        }
     });
 });
 
@@ -542,7 +622,7 @@ function mostrarAlertaError(mensaje) {
     
         $.ajax({
             url: 'http://127.0.0.1:8000/services/tareas/' + taskId + '/',
-            method: 'PUT', // Usar PUT para actualizar el estado
+            method: 'POST', // Usar PUT para actualizar el estado
             contentType: 'application/json',
             data: JSON.stringify(formData),
             success: function(response) {
@@ -562,9 +642,23 @@ function mostrarAlertaError(mensaje) {
     }
     
     function crearHistorialTareaEstado(idTarea) {
+        // Obtener la fecha y hora actual del sistema
+        var now = new Date();
+        var formattedDate = now.toLocaleString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    
+        // Construir el detalle con la fecha y hora
+        var detalle = `Tarea completada el ${formattedDate}`;
+    
         var formData = {
             idTarea: idTarea,
-            detalle: 'Tarea completada'
+            detalle: detalle
         };
     
         $.ajax({
@@ -583,5 +677,6 @@ function mostrarAlertaError(mensaje) {
             }
         });
     }
+    
 
 
