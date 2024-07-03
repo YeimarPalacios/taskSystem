@@ -114,9 +114,6 @@ def asignar_tarea(request):
         assign_task = request.GET.get('taskId')
         assign_user = request.GET.get('userId')
         
-        print("userId antes de quitar el @")
-        print(assign_user)
-        print(assign_task)
         serialized_data = {
                 'idUsuario': assign_user
             }
@@ -140,28 +137,14 @@ def asignar_tarea(request):
 
         return JsonResponse(response.json())
 
-       
-
-    #     context = {
-    #         'title': title,
-    #         'desc': desc,
-    #         'assign': assign_email,
-    #         'user': correo
-    #     }
-
-    #     html = render_to_string('task_item.html', context=context)
-    #     return JsonResponse({'html': html})
-    # return JsonResponse({'error': 'Método no permitido'})
-        
 def logout_view(request):
-    print("invoque al logout:::::::::")
+
     if request.method == 'POST':
     # Obtener el token de acceso de la sesión del usuario
         authorization_data = request.session.get('authorization', None)
-        print("logaut---------")
+       
         if authorization_data:
             access_token = authorization_data['access_token']
-            print(access_token)
             # Llamar a la API de cierre de sesión
             response = requests.post(
                 f'{settings.API_BASE_URL}/authorization/api/logout/',
@@ -177,5 +160,3 @@ def logout_view(request):
                 return JsonResponse(response.json())
         else:
             return JsonResponse({'error': 'no esta autenticado'})
-
-    # return redirect('login')
