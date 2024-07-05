@@ -45,7 +45,6 @@ class TareaRetrieveUpdateDestroyAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, pk):
-        print('::::::::::::::::::::ingrese al post::::::::::::::::::')
         tarea = self.get_object(pk)
         serializer = TareaSerializer(tarea, data=request.data, partial=True)
         if serializer.is_valid():
