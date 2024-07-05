@@ -5,10 +5,8 @@ from myapp.security.custom_anonymous_user import CustomAnonymousUser
 import re
 
 class NotificationConsumer(AsyncWebsocketConsumer):
-    print ("Estoy en NotificationConsumer")
 
     async def connect(self):
-        print("estoy conectado a NotificationConsumer")
         self.user = self.scope["user"]
         #print(f'user_{self.user.nombre}{self.user.apellido}')
         correo = re.sub(r'[^\w.-]', '', self.user['correo'])[:100]

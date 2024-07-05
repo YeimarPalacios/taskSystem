@@ -139,10 +139,6 @@ function onErrortarea(xhr, status, error) {
 // Llamar a la función para consultar tareas al cargar la página u otro evento apropiado
 
 
-
-
-
-
 function mostrarHistorialTarea(idTarea) {
     $.ajax({
         type: "GET",
@@ -345,12 +341,6 @@ $(document).on('click', '.eliminar-task', function() {
     });
 });
 
-
-
-
-
-
-
 function EditarTareaClick(button, nombreUsuario, apellidoUsuario) {
     var taskId = $(button).data('id');
 
@@ -550,20 +540,6 @@ function mostrarAlertaError(mensaje) {
         text: mensaje
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // Eventos para cambiar estado de una tarea
     function mostrarModalCambiarEstado(taskId) {
         // Preparar el modal para mostrar el título adecuado
